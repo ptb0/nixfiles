@@ -1,5 +1,5 @@
 {
-  description = "petrol's nixos & nix-darwin flake";
+  description = "do1ptb nix cluster";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -10,9 +10,6 @@
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
-    home-manager.url = "github:nix-community/home-manager/release-25.11";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
-
     #impermanence.url = "github:nix-community/impermanence";
     #impermanence.inputs.nixpkgs.follows = "nixpkgs";
     #impermanence.home-manager.follows = "home-manager";
@@ -20,59 +17,38 @@
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
 
-    plasma-manager.url = "github:nix-community/plasma-manager";
-    plasma-manager.inputs.nixpkgs.follows = "nixpkgs";
-    plasma-manager.inputs.home-manager.follows = "home-manager";
-
     mac-app-util.url = "github:hraban/mac-app-util";
+    mac-app-util.inputs.nixpkgs.follows = "nixpkgs";
+
+    manix.url = "github:nix-community/manix";
+    manix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = {
-      self,
-      nixpkgs,
-      nixpkgs-master,
-      nix-darwin,
-      nixos-hardware,
-      home-manager,
-      plasma-manager,
-      ...
-  } @inputs: let
-    vars = {
-      user = "lain";
-      editor = "emacs";
-    };
-    # supported systems for flakes, shell, etc.
-    systems = [
-      "aarch64-darwin"
-      "x86_64-linux"
-    ];
-  in {
-    nixosConfigurations = {
-      "oak" = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = inputs;
-        modules = [
-          ./hosts/nixos/desktop
-          #disko.nixosModules.disko
-          home-manager.nixosModules.home-manager {
-            home-manager.sharedModules = [ plasma-manager.homeModules.plasma-manager ];
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users."lain" = import ./hosts/nixos/home.nix;
-          }
-        ];
+  outputs = inputs@{ nixpkgs,nixpkgs-master,nix-darwin,nixos-hardware,disko,mac-app-util,manix,... }: 
+    let
+      overlay = final: prev: {
+        nixpkgs-master = import nixpkgs-master { inherit (prev) system; config.allowUnfree = true; };
       };
+      # Overlays-module makes "pkgs.unstable" available in configuration.nix
+      overlayModule = ({ config, pkgs, ... }: { nixpkgs.overlays = [ overlay ]; });
+      # extract hostname from hostname.nix
+      hostnames = builtins.attrNames (builtins.readDir ./hosts);
+      systemForHost = hostname:
+        if builtins.elem hostname ["host1" "host2"] then "aarch64-linux"
+        else "x86_64-linux";
+      # available through $> nix fmt
+      #formatter.x86_64-linux = nixpkgs.legacyPackages.${system}.alejandra;
+      #formatter.aarch64-darwin = nixpkgs.legacyPackages.${system}.alejandra;
+    in {
+      nixosConfigurations = builtins.listToAttrs (builtins.map (host: {
+        name = host;
+        value = nixpkgs.lib.nixosSystem {
+          system = systemForHost host;
+          specialArgs = {
+            inherit inputs;
+          };
+          modules = [ overlayModule ./hosts/${host}/configuration.nix ];
+        };
+      }) hostnames);
     };
-
-    darwinConfigurations = {
-      "norns" = nix-darwin.lib.darwinSystem {
-        system = "aarch64-darwin";
-        specialArgs = inputs;
-        modules = [
-          ./darwin
-          home-manager.darwinModules.home-manager
-        ];
-      };
-    };
-  };
 }
