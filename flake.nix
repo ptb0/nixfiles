@@ -19,12 +19,9 @@
 
     mac-app-util.url = "github:hraban/mac-app-util";
     mac-app-util.inputs.nixpkgs.follows = "nixpkgs";
-
-    manix.url = "github:nix-community/manix";
-    manix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ nixpkgs,nixpkgs-master,nix-darwin,nixos-hardware,disko,mac-app-util,manix,... }: 
+  outputs = inputs@{ nixpkgs,nixpkgs-master,nix-darwin,nixos-hardware,disko,mac-app-util, ... }: 
     let
       overlay = final: prev: {
         nixpkgs-master = import nixpkgs-master { inherit (prev) system; config.allowUnfree = true; };

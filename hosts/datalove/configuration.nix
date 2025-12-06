@@ -1,4 +1,4 @@
-{ config, lib, inputs, pkgs, nixpkgs-master, ... }: {
+{ pkgs, ... }: {
   imports = [
     ./hardware-configuration.nix
 
@@ -8,6 +8,7 @@
     ../../modules/services.nix
     ../../modules/users.nix
     ../../modules/shell.nix
+    ../../modules/displaymanager.nix
   ];
   
   time.timeZone = "Europe/Amsterdam";
@@ -27,7 +28,6 @@
 
   ### SERVICES/DISPLAYMANAGER
   services = {
-     displayManager.sddm.enable = true;
      desktopManager.plasma6.enable = true;
   };
 
@@ -39,15 +39,11 @@
       # typesetting
       texliveMedium
       typst
+      pandoc
 
       # music
       strawberry
       nicotine-plus
-
-      # games
-      # dolphin-emu
-      # rpcs3
-      openttd
 
       # security
       keepassxc
@@ -55,14 +51,24 @@
 
       # system
       p7zip
-      kdePackages.partitionmanager
+      curl
       wget
-      vim
-
+      eza
+      
       # development
       emacs-pgtk
+      neovim
       git
+      fossil
       sbcl
+      guile
+      sqlite
+
+      # nix specific tools
+      manix
+      nixd
+      alejandra
+      comma
   ];
   
   ### NIX ENABLED PACKAGES
