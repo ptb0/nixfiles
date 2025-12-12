@@ -85,7 +85,7 @@
             ./darwin/modules/darwin.nix
             ./darwin/modules/homebrew.nix
             ./darwin/modules/aerospace.nix
-            ./darwin/modules/sketchybar.nix
+            #./darwin/modules/sketchybar.nix
             home-manager.darwinModules.home-manager
             {
               home-manager.useUserPackages = true;

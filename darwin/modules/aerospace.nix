@@ -23,8 +23,6 @@
                   end tell'
               '';
 
-	      cmd-s = "layout v_accordion";
-        cmd-w = "layout h_accordion";
 	      cmd-e = "layout tiles horizontal vertical";
 
 	      cmd-shift-space = "layout floating tiling";
