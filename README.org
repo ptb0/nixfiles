@@ -1,0 +1,9 @@
+* README
+
+#+CAPTION: MacOS Sonoma with Aerospace and iTerm2
+#+NAME: SCR1
+[[./darwin.png]]
+
+#+CAPTION: Desktop NixOS with Plasma 6
+#+NAME: SCR2
+[[./nixos.png]]
