@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{pkgs, ...}: {
   imports = [
     ./hardware-configuration.nix
 
@@ -10,7 +10,7 @@
     ../../modules/shell.nix
     ../../modules/displaymanager.nix
   ];
-  
+
   time.timeZone = "Europe/Amsterdam";
 
   ### KEYBOARD
@@ -28,7 +28,7 @@
 
   ### SERVICES/DISPLAYMANAGER
   services = {
-     desktopManager.plasma6.enable = true;
+    desktopManager.plasma6.enable = true;
   };
 
   ### MISC
@@ -36,41 +36,41 @@
 
   ### PACKAGE LIST
   environment.systemPackages = with pkgs; [
-      # typesetting
-      texliveMedium
-      typst
-      pandoc
+    # typesetting
+    texliveMedium
+    typst
+    pandoc
 
-      # music
-      strawberry
-      nicotine-plus
+    # music
+    strawberry
+    nicotine-plus
 
-      # security
-      keepassxc
-      gnupg1
+    # security
+    keepassxc
+    gnupg1
 
-      # system
-      p7zip
-      curl
-      wget
-      eza
-      
-      # development
-      emacs-pgtk
-      neovim
-      git
-      fossil
-      sbcl
-      guile
-      sqlite
+    # system
+    p7zip
+    curl
+    wget
+    eza
 
-      # nix specific tools
-      manix
-      nixd
-      alejandra
-      comma
+    # development
+    emacs-pgtk
+    neovim
+    git
+    fossil
+    sbcl
+    guile
+    sqlite
+
+    # nix specific tools
+    manix
+    nixd
+    alejandra
+    comma
   ];
-  
+
   ### NIX ENABLED PACKAGES
   programs.firefox.enable = true;
   programs.steam = {
@@ -79,8 +79,7 @@
     dedicatedServer.openFirewall = false; # Open ports in the firewall for Source Dedicated Server
     localNetworkGameTransfers.openFirewall = false; # Open ports in the firewall for Steam Local Network Game Transfers
   };
-  
+
   # dont change lol
   system.stateVersion = "24.11";
-
 }

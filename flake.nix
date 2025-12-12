@@ -14,38 +14,90 @@
     #impermanence.inputs.nixpkgs.follows = "nixpkgs";
     #impermanence.home-manager.follows = "home-manager";
 
-    disko.url = "github:nix-community/disko";
-    disko.inputs.nixpkgs.follows = "nixpkgs";
+    #disko.url = "github:nix-community/disko";
+    #disko.inputs.nixpkgs.follows = "nixpkgs";
 
-    mac-app-util.url = "github:hraban/mac-app-util";
-    mac-app-util.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    mac-app-util = {
+      url = "github:hraban/mac-app-util";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs@{ nixpkgs,nixpkgs-master,nix-darwin,nixos-hardware,disko,mac-app-util, ... }: 
-    let
-      overlay = final: prev: {
-        nixpkgs-master = import nixpkgs-master { inherit (prev) system; config.allowUnfree = true; };
+  outputs = inputs @ {
+    nixpkgs,
+    nixpkgs-master,
+    nix-darwin,
+    nixos-hardware,
+    disko,
+    home-manager,
+    mac-app-util,
+    ...
+  }: let
+    overlay = final: prev: {
+      nixpkgs-master = import nixpkgs-master {
+        inherit (prev) system;
+        config.allowUnfree = true;
       };
-      # Overlays-module makes "pkgs.unstable" available in configuration.nix
-      overlayModule = ({ config, pkgs, ... }: { nixpkgs.overlays = [ overlay ]; });
-      # extract hostname from hostname.nix
-      hostnames = builtins.attrNames (builtins.readDir ./hosts);
-      systemForHost = hostname:
-        if builtins.elem hostname ["host1" "host2"] then "aarch64-linux"
-        else "x86_64-linux";
-      # available through $> nix fmt
-      #formatter.x86_64-linux = nixpkgs.legacyPackages.${system}.alejandra;
-      #formatter.aarch64-darwin = nixpkgs.legacyPackages.${system}.alejandra;
-    in {
-      nixosConfigurations = builtins.listToAttrs (builtins.map (host: {
+    };
+    # Overlays-module makes "pkgs.unstable" available in configuration.nix
+    overlayModule = {
+      config,
+      pkgs,
+      ...
+    }: {nixpkgs.overlays = [overlay];};
+
+    hostnames = builtins.attrNames (builtins.readDir ./hosts);
+    systemForHost = hostname:
+      if builtins.elem hostname ["norns"]
+      then "aarch64-darwin"
+      else "x86_64-linux";
+  in {
+    # available through `nix fmt`
+    formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.alejandra;
+    formatter.aarch64-darwin = nixpkgs.legacyPackages.aarch64-darwin.alejandra;
+    
+    nixosConfigurations = builtins.listToAttrs (builtins.map (host: {
         name = host;
         value = nixpkgs.lib.nixosSystem {
           system = systemForHost host;
           specialArgs = {
             inherit inputs;
           };
-          modules = [ overlayModule ./hosts/${host}/configuration.nix ];
+          modules = [overlayModule ./hosts/${host}/configuration.nix];
         };
-      }) hostnames);
-    };
+      })
+      hostnames);
+
+    darwinConfigurations = builtins.listToAttrs (builtins.map (host: {
+        name = host;
+        value = nix-darwin.lib.darwinSystem {
+          system = systemForHost host;
+          specialArgs = {
+            inherit inputs;
+          };
+          modules = [
+            ./darwin/modules/darwin.nix
+            ./darwin/modules/homebrew.nix
+            home-manager.darwinModules.home-manager
+            {
+              home-manager.useUserPackages = true;
+              home-manager.useGlobalPkgs = true;
+              home-manager.users.ptb.imports = [
+                ./darwin/modules
+              ];
+              home-manager.extraSpecialArgs = {
+                inherit inputs;
+                system = "aarch64-darwin";
+              };
+            }
+          ];
+        };
+      })
+      hostnames);
+  };
 }
