@@ -75,6 +75,7 @@
       dock.autohide-delay = 0.2;
       dock.expose-animation-duration = 0.1;
       NSGlobalDomain.NSWindowResizeTime = 0.05;
+      NSGlobalDomain.NSAutomaticWindowAnimationsEnabled = false;
       dock.mineffect = "suck";
       dock.mru-spaces = false;
       dock.show-recents = false;

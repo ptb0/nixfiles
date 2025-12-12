@@ -7,8 +7,8 @@
 {
   imports = [
     ./zsh.nix
-    ./gpg.nix
-    ./neovim.nix
+    #./gpg.nix
+    #./neovim.nix
   ];
 
   programs.home-manager.enable = true;

@@ -55,8 +55,7 @@
     hostnames = builtins.attrNames (builtins.readDir ./hosts);
 
     systemForHost = hostname:
-      if builtins.elem hostname [ "norns" ] then "aarch64-darwin";
-      # else "x86_64-linux";
+      if builtins.elem hostname [ "norns" ] then "aarch64-darwin" else "x86_64-linux";
 
   in {
     # available through `nix fmt`
@@ -85,6 +84,8 @@
           modules = [
             ./darwin/modules/darwin.nix
             ./darwin/modules/homebrew.nix
+            ./darwin/modules/aerospace.nix
+            ./darwin/modules/sketchybar.nix
             home-manager.darwinModules.home-manager
             {
               home-manager.useUserPackages = true;
