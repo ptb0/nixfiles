@@ -44,6 +44,7 @@
         config.allowUnfree = true;
       };
     };
+
     # Overlays-module makes "pkgs.unstable" available in configuration.nix
     overlayModule = {
       config,
@@ -52,10 +53,11 @@
     }: {nixpkgs.overlays = [overlay];};
 
     hostnames = builtins.attrNames (builtins.readDir ./hosts);
+
     systemForHost = hostname:
-      if builtins.elem hostname ["norns"]
-      then "aarch64-darwin"
-      else "x86_64-linux";
+      if builtins.elem hostname [ "norns" ] then "aarch64-darwin";
+      # else "x86_64-linux";
+
   in {
     # available through `nix fmt`
     formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.alejandra;
